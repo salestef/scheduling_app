@@ -1,0 +1,50 @@
+security:
+    # Hashing password configuration
+    password_hashers:
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+
+    # User provider configuration
+    providers:
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: email
+
+    # Firewall configuration
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+        main:
+            lazy: true
+            provider: app_user_provider
+            form_login:
+                login_path: app_login
+                check_path: app_login
+                default_target_path: / # After login, redirect to the home page
+                enable_csrf: true
+            logout:
+                path: app_logout
+                # where to redirect after logout
+                # target: app_any_route
+            # Optional: Uncomment if using custom authenticator
+            # custom_authenticator: App\Security\CustomAuthenticator
+
+    # Access control configuration
+    access_control:
+        # Allow anonymous access to login and registration pages
+        - { path: ^/login, roles: PUBLIC_ACCESS }
+        - { path: ^/register, roles: PUBLIC_ACCESS }
+
+        # Allow authenticated users to access the home page
+        - { path: ^/, roles: PUBLIC_ACCESS }
+
+        # Restrict access to the scheduling route to authenticated users
+        - { path: ^/schedule, roles: ROLE_USER } # Adjust `/schedule` to the path where you schedule appointments
+
+        # Restrict access to the backoffice route to admin users
+        - { path: ^/backoffice, roles: ROLE_ADMIN } # Adjust `/backoffice` as necessary
+
+        # Restrict access to profile pages to authenticated users
+        - { path: ^/profile, roles: ROLE_USER }

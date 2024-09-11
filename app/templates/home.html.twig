@@ -1,0 +1,11 @@
+{# templates/home.html.twig #}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Welcome to My Symfony App{% endblock %}
+
+{% block body %}
+    <h1>Welcome to the Home Page</h1>
+    <p>This is the homepage of your Symfony application!</p>
+    <a href="{{ path('app_register') }}">Register now</a>
+{% endblock %}

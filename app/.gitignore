@@ -1,0 +1,47 @@
+###> symfony/framework-bundle ###
+/.env.local
+/.env.local.php
+/.env.*.local
+/config/secrets/prod/prod.decrypt.private.php
+/public/bundles/
+/var/
+/vendor/
+###< symfony/framework-bundle ###
+
+# Composer related
+/composer.lock
+
+# Symfony specific cache/logs
+/var/cache/
+/var/log/
+
+# PHPStorm or any JetBrains IDE related
+/.idea/
+
+# Node.js (ako koristiš npm ili yarn za frontend)
+/node_modules/
+/package-lock.json
+/yarn.lock
+
+# Docker related
+/docker-compose.override.yaml
+/.docker
+
+# Ignore all other environment files except the main .env
+!.env
+.env.*
+
+# Symfony profiler (ako koristiš Symfony profiler u development modu)
+/var/profiler/
+
+# Logs
+*.log
+*.log.*
+
+# OS specific (ako si ikad slučajno dodao ove fajlove)
+/.DS_Store
+Thumbs.db
+
+# Backup files
+*.bak
+*.swp
