@@ -1,0 +1,28 @@
+{# templates/booking/booking.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Book a Slot</h1>
+
+    <div id="calendar"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                events: [
+                    {% for slot in slots %}
+                    {
+                        title: 'Available',
+                        start: '{{ slot.date|date('Y-m-d') }}T{{ slot.startTime|date('H:i') }}',
+                        end: '{{ slot.date|date('Y-m-d') }}T{{ slot.endTime|date('H:i') }}',
+                        url: '{{ path('booking_reserve', {'slot': slot.id}) }}'
+                    },
+                    {% endfor %}
+                ]
+            });
+            calendar.render();
+        });
+    </script>
+{% endblock %}

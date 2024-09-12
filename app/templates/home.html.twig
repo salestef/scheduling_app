@@ -2,10 +2,31 @@
 
 {% extends 'base.html.twig' %}
 
-{% block title %}Welcome to My Symfony App{% endblock %}
+{% block title %}Welcome to Paddle Tennis{% endblock %}
 
 {% block body %}
-    <h1>Welcome to the Home Page</h1>
-    <p>This is the homepage of your Symfony application!</p>
-    <a href="{{ path('app_register') }}">Register now</a>
+    <div class="jumbotron text-center" style="background-image: url('{{ asset('images/padel-background.jpg') }}'); background-size: cover; background-position: center; height: 60vh;">
+        <div class="d-flex flex-column justify-content-center align-items-center h-100 text-white">
+            <h1 class="display-4">Welcome to Paddle Tennis</h1>
+            <p class="lead">Book your padel court now and enjoy the game!</p>
+            <a href="{{ path('booking_index') }}" class="btn btn-primary btn-lg">Book Now</a>
+        </div>
+    </div>
+
+    <div class="container mt-5">
+        <section class="my-5">
+            <h2 class="text-center">About Padel Tennis</h2>
+            <p>Padel tennis is a fun and social sport that combines elements of tennis and squash. It's played in doubles on an enclosed court about one-third the size of a tennis court.</p>
+        </section>
+
+        <section class="my-5">
+            <h2 class="text-center">Why Choose Us?</h2>
+            <p>Our facilities provide top-tier padel courts, professional coaching, and a welcoming community for all skill levels. Book a court now and experience the best of padel tennis!</p>
+        </section>
+
+        <section class="my-5">
+            <h2 class="text-center">Location</h2>
+            <p class="text-center">Find us at 123 Padel Lane, Sports City. We are open from 8 AM to 10 PM every day!</p>
+        </section>
+    </div>
 {% endblock %}

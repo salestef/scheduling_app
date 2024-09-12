@@ -1,0 +1,30 @@
+/* public/css/backoffice.css */
+body {
+    font-family: Arial, sans-serif;
+}
+
+#sidebar {
+    width: 200px;
+    float: left;
+    background-color: #f8f9fa;
+    padding: 15px;
+}
+
+#sidebar ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+#sidebar ul li {
+    margin-bottom: 10px;
+}
+
+#sidebar ul li a {
+    text-decoration: none;
+    color: #007bff;
+}
+
+#main-content {
+    margin-left: 220px;
+    padding: 15px;
+}

@@ -31,3 +31,9 @@ services:
     # Register custom authenticator if you have one
     App\Security\FormLoginAuthenticator:
         tags: ['security.authenticator']
+
+    App\Security\LoginSuccessHandler:
+        arguments:
+            $urlGenerator: '@router'
+        tags:
+            - { name: 'monolog.logger', channel: 'security' }

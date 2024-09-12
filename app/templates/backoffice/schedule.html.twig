@@ -1,0 +1,47 @@
+{# templates/backoffice/schedule.html.twig #}
+{% extends 'backoffice/backoffice.html.twig' %}
+
+{% block body %}
+    <h1>Manage Schedule</h1>
+
+    <form method="post">
+        <div class="mb-3">
+            <label for="date" class="form-label">Date</label>
+            <input type="date" class="form-control" id="date" name="date" required>
+        </div>
+        <div class="mb-3">
+            <label for="start_time" class="form-label">Start Time</label>
+            <input type="time" class="form-control" id="start_time" name="start_time" required>
+        </div>
+        <div class="mb-3">
+            <label for="end_time" class="form-label">End Time</label>
+            <input type="time" class="form-control" id="end_time" name="end_time" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Slot</button>
+    </form>
+
+    <h2>Available Slots</h2>
+    <ul>
+        {% for slot in slots %}
+            <li>{{ slot.date|date('Y-m-d') }} from {{ slot.startTime|date('H:i') }} to {{ slot.endTime|date('H:i') }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Calendar View</h2>
+    <div id='calendar'></div> {# FullCalendar će se ovde prikazati #}
+
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar/index.global.min.js'></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const calendarEl = document.getElementById('calendar');
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                events: '/get-events',  // Ova ruta treba da vraća JSON podatke o terminima
+                dateClick: function(info) {
+                    alert('Clicked on: ' + info.dateStr); // Za buduće proširenje funkcionalnosti
+                }
+            });
+            calendar.render();
+        });
+    </script>
+{% endblock %}
