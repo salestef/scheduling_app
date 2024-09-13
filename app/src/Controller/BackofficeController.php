@@ -21,13 +21,13 @@ class BackofficeController extends AbstractController
     {
     }
 
-    #[Route('/backoffice', name: 'backoffice_index')]
-    public function index(): Response
-    {
-        return $this->render('backoffice/index.html.twig');
-    }
+//    #[Route('/backoffice', name: 'backoffice_index')]
+//    public function index(): Response
+//    {
+//        return $this->render('backoffice/index.html.twig');
+//    }
 
-    #[Route('/backoffice/schedule', name: 'backoffice_schedule')]
+    #[Route('/backoffice', name: 'backoffice_index')]
     public function schedule(Request $request, EntityManagerInterface $em): Response
     {
         // Prikaz svih termina
@@ -45,7 +45,7 @@ class BackofficeController extends AbstractController
             $em->persist($slot);
             $em->flush();
 
-            return $this->redirectToRoute('backoffice_schedule');
+            return $this->redirectToRoute('backoffice_index');
         }
 
         return $this->render('backoffice/schedule.html.twig', [
@@ -53,23 +53,75 @@ class BackofficeController extends AbstractController
         ]);
     }
 
+    // Dodajemo nove rute za dodavanje, uređivanje i brisanje slotova
+    #[Route('/backoffice/save-slot', name: 'save_slot', methods: ['POST'])]
+    public function saveSlot(Request $request, EntityManagerInterface $em): JsonResponse
+    {
+        $slotId = $request->get('id');
+        $slot = $slotId ? $em->getRepository(Slot::class)->find($slotId) : new Slot();
+
+        $slot->setDate(new \DateTime($request->get('date')));
+        $slot->setStartTime(new \DateTime($request->get('start_time')));
+        $slot->setEndTime(new \DateTime($request->get('end_time')));
+//        $slot->setStatus($request->get('status'));
+        $slot->setIsAvailable($request->get('status') === 'confirmed');
+
+        if (!$slotId) {
+            $slot->setCreatedBy($this->getUser()); // Admin koji kreira
+            $em->persist($slot);
+        }
+
+        $em->flush();
+
+        return new JsonResponse(['success' => true]);
+    }
+
     #[Route('/backoffice/get-events', name: 'get_events')]
     public function getEvents(EntityManagerInterface $em): JsonResponse
     {
         $slots = $em->getRepository(Slot::class)->findAll();
-
         $events = [];
+
         foreach ($slots as $slot) {
-            $events[] = [
-                'title' => 'Zakazan termin',
-                'start' => $slot->getDate()->format('Y-m-d') . 'T' . $slot->getStartTime()->format('H:i:s'),
-                'end' => $slot->getDate()->format('Y-m-d') . 'T' . $slot->getEndTime()->format('H:i:s'),
-                'allDay' => false,
-            ];
+            // Proveravamo da li slot ima povezanu rezervaciju
+            $reservation = $slot->getReservation();
+            if ($reservation) {
+                // Setovanje boje na osnovu statusa
+                $color = '';
+                switch ($reservation->getStatus()) {
+                    case 'pending':
+                        $color = 'yellow';
+                        break;
+                    case 'approved':
+                        $color = 'green';
+                        break;
+                    case 'rejected':
+                        $color = 'red';
+                        break;
+                }
+
+                $events[] = [
+                    'title' => 'Rezervisan: ' . $reservation->getUser()->getEmail(), // Prikaz korisničkog email-a
+                    'start' => $slot->getDate()->format('Y-m-d') . 'T' . $slot->getStartTime()->format('H:i:s'),
+                    'end' => $slot->getDate()->format('Y-m-d') . 'T' . $slot->getEndTime()->format('H:i:s'),
+                    'color' => $color, // Dodajemo boju na osnovu statusa
+                    'allDay' => false,
+                ];
+            } else {
+                // Prikazujemo slobodne slotove
+                $events[] = [
+                    'title' => 'Slobodan slot',
+                    'start' => $slot->getDate()->format('Y-m-d') . 'T' . $slot->getStartTime()->format('H:i:s'),
+                    'end' => $slot->getDate()->format('Y-m-d') . 'T' . $slot->getEndTime()->format('H:i:s'),
+                    'color' => 'blue', // Plava boja za slobodne slotove
+                    'allDay' => false,
+                ];
+            }
         }
 
         return new JsonResponse($events);
     }
+
 
     #[Route('/backoffice/users', name: 'backoffice_users')]
     public function users(): Response

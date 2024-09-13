@@ -35,10 +35,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'boolean')]
     private $isVerified = false;
 
-    #[ORM\OneToMany(targetEntity: Slot::class, mappedBy: 'created_by')]
+    #[ORM\OneToMany(targetEntity: Slot::class, mappedBy: 'createdBy')]
     private Collection $slots;
 
-    #[ORM\OneToMany(targetEntity: Reservation::class, mappedBy: 'userId')]
+    #[ORM\OneToMany(targetEntity: Reservation::class, mappedBy: 'user')]
     private Collection $reservations;
 
     public function __construct()
@@ -129,15 +129,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * @return Collection<int, Slot>
-     */
     public function getSlots(): Collection
     {
         return $this->slots;
     }
 
-    public function addSlot(Slot $slot): static
+    public function addSlot(Slot $slot): self
     {
         if (!$this->slots->contains($slot)) {
             $this->slots->add($slot);
@@ -147,7 +144,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function removeSlot(Slot $slot): static
+    public function removeSlot(Slot $slot): self
     {
         if ($this->slots->removeElement($slot)) {
             // set the owning side to null (unless already changed)
@@ -159,15 +156,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * @return Collection<int, Reservation>
-     */
     public function getReservations(): Collection
     {
         return $this->reservations;
     }
 
-    public function addReservation(Reservation $reservation): static
+    public function addReservation(Reservation $reservation): self
     {
         if (!$this->reservations->contains($reservation)) {
             $this->reservations->add($reservation);
@@ -177,7 +171,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function removeReservation(Reservation $reservation): static
+    public function removeReservation(Reservation $reservation): self
     {
         if ($this->reservations->removeElement($reservation)) {
             // set the owning side to null (unless already changed)

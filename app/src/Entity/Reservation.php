@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Entity;
 
 use App\Repository\ReservationRepository;
@@ -13,10 +12,12 @@ class Reservation
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'reservations')]
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'reservations')]
+    #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
-    #[ORM\ManyToOne(inversedBy: 'reservations')]
+    #[ORM\OneToOne(inversedBy: 'reservation')]
+    #[ORM\JoinColumn(nullable: false)] // slot mora biti obavezno polje
     private ?Slot $slot = null;
 
     #[ORM\Column(length: 255)]
@@ -24,6 +25,12 @@ class Reservation
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
+
+    public function __construct()
+    {
+        $this->createdAt = new \DateTimeImmutable();
+    }
+    // Getteri i setteri za Reservation entitet
 
     public function getId(): ?int
     {
@@ -78,3 +85,4 @@ class Reservation
         return $this;
     }
 }
+

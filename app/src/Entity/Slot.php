@@ -28,15 +28,14 @@ class Slot
     #[ORM\Column]
     private ?bool $isAvailable = null;
 
-    #[ORM\ManyToOne(inversedBy: 'slots')]
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'slots')]
     private ?User $createdBy = null;
 
-    #[ORM\OneToMany(targetEntity: Reservation::class, mappedBy: 'slotId')]
-    private Collection $reservations;
+    #[ORM\OneToOne(mappedBy: 'slot')]
+    private ?Reservation $reservation = null;
 
     public function __construct()
     {
-        $this->reservations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -111,32 +110,14 @@ class Slot
         return $this;
     }
 
-    /**
-     * @return Collection<int, Reservation>
-     */
-    public function getReservations(): Collection
+    public function getReservation(): ?Reservation
     {
-        return $this->reservations;
+        return $this->reservation;
     }
 
-    public function addReservation(Reservation $reservation): static
+    public function setReservation(?Reservation $reservation): static
     {
-        if (!$this->reservations->contains($reservation)) {
-            $this->reservations->add($reservation);
-            $reservation->setSlot($this);
-        }
-
-        return $this;
-    }
-
-    public function removeReservation(Reservation $reservation): static
-    {
-        if ($this->reservations->removeElement($reservation)) {
-            // set the owning side to null (unless already changed)
-            if ($reservation->getSlot() === $this) {
-                $reservation->setSlot(null);
-            }
-        }
+        $this->reservation = $reservation;
 
         return $this;
     }

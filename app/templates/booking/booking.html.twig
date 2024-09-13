@@ -6,22 +6,87 @@
 
     <div id="calendar"></div>
 
+    <!-- Modal for reservation confirmation -->
+    <div class="modal fade" id="reservationModal" tabindex="-1" aria-labelledby="reservationModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reservationModalLabel">Confirm Reservation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to reserve this slot?</p>
+                    <input type="hidden" id="slotId" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirmReservation">Confirm Reservation</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
                 events: [
-                    {% for slot in slots %}
+                    {% for slot in availableSlots %}
                     {
                         title: 'Available',
                         start: '{{ slot.date|date('Y-m-d') }}T{{ slot.startTime|date('H:i') }}',
                         end: '{{ slot.date|date('Y-m-d') }}T{{ slot.endTime|date('H:i') }}',
-                        url: '{{ path('booking_reserve', {'slot': slot.id}) }}'
+                        backgroundColor: '#28a745', // Green for available slots
+                        borderColor: '#28a745',
+                        url: '#',
+                        extendedProps: {
+                            id: '{{ slot.id }}'
+                        }
                     },
                     {% endfor %}
-                ]
+
+                    {% for reservation in userReservations %}
+                    {
+                        title: 'Reserved by You',
+                        start: '{{ reservation.slot.date|date('Y-m-d') }}T{{ reservation.slot.startTime|date('H:i') }}',
+                        end: '{{ reservation.slot.date|date('Y-m-d') }}T{{ reservation.slot.endTime|date('H:i') }}',
+                        backgroundColor: '#dc3545', // Red for reserved slots
+                        borderColor: '#dc3545',
+                        extendedProps: {
+                            status: '{{ reservation.status }}'
+                        }
+                    },
+                    {% endfor %}
+                ],
+                eventClick: function(info) {
+                    var slotId = info.event.extendedProps.id;
+                    if (slotId) {
+                        document.getElementById('slotId').value = slotId;
+                        var myModal = new bootstrap.Modal(document.getElementById('reservationModal'));
+                        myModal.show();
+                    }
+                }
             });
+
+            document.getElementById('confirmReservation').addEventListener('click', function() {
+                var slotId = document.getElementById('slotId').value;
+                if (slotId) {
+                    fetch('{{ path('booking_reserve') }}?slot=' + slotId, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        credentials: 'same-origin'
+                    }).then(response => {
+                        if (response.ok) {
+                            window.location.reload();
+                        }
+                    });
+                }
+            });
+
             calendar.render();
         });
     </script>
