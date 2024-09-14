@@ -31,7 +31,7 @@ class LoginSuccessHandler implements AuthenticationSuccessHandlerInterface
         }
 
         // Default redirection for non-admin users
-        $url = $this->urlGenerator->generate('home_index');
+        $url = $this->urlGenerator->generate('booking_index');
         return new RedirectResponse($url);
     }
 }

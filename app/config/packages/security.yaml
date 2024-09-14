@@ -22,31 +22,34 @@ security:
             form_login:
                 login_path: app_login
                 check_path: app_login
-#                default_target_path: / # After login, redirect to the home page
+                default_target_path: booking_index
                 enable_csrf: true
                 # Custom redirect based on role
                 success_handler: App\Security\LoginSuccessHandler
             logout:
                 path: app_logout
                 # where to redirect after logout
-                # target: app_any_route
+                target: home_index
             # Optional: Uncomment if using custom authenticator
             # custom_authenticator: App\Security\CustomAuthenticator
 
     # Access control configuration
     access_control:
         # Allow anonymous access to login and registration pages
-        - { path: ^/login, roles: PUBLIC_ACCESS }
-        - { path: ^/register, roles: PUBLIC_ACCESS }
-
-        # Allow authenticated users to access the home page
-        - { path: ^/, roles: ROLE_USER }
+#        - { path: ^/login, roles: PUBLIC_ACCESS }
+#        - { path: ^/register, roles: PUBLIC_ACCESS }
 
         # Restrict access to the scheduling route to authenticated users
-        - { path: ^/schedule, roles: ROLE_USER } # Adjust `/schedule` to the path where you schedule appointments
+        - { path: /home, roles: PUBLIC_ACCESS }
+        - { path: ^/booking, roles: PUBLIC_ACCESS }
+        - { path: ^/about-us, roles: PUBLIC_ACCESS }
+        - { path: ^/contact, roles: PUBLIC_ACCESS }
 
         # Restrict access to the backoffice route to admin users
         - { path: ^/backoffice, roles: ROLE_ADMIN } # Adjust `/backoffice` as necessary
 
         # Restrict access to profile pages to authenticated users
         - { path: ^/profile, roles: ROLE_USER }
+
+        # Allow authenticated users to access the home page
+#        - { path: ^/, roles: ROLE_USER }

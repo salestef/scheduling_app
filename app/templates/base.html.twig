@@ -41,10 +41,10 @@
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ path('app_login') }}">Login</a>
+                            <a class="nav-link" href="#" id="openLoginPopup" data-bs-toggle="modal" data-bs-target="#authModal">Login</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ path('app_register') }}">Register</a>
+                            <a class="nav-link" href="#" id="openRegisterPopup" data-bs-toggle="modal" data-bs-target="#authModal">Register</a>
                         </li>
                     {% endif %}
                 </ul>
@@ -55,6 +55,64 @@
 
 <main class="container">
     {% block body %}{% endblock %}
+    {# Popup login register #}
+    <div class="modal fade" id="authModal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="authModalLabel">Login</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Login Form -->
+                    <div id="loginForm">
+                        <form action="{{ path('app_login') }}" method="post" class="needs-validation" novalidate>
+                            {# Prikazivanje greške ako postoji #}
+                            {% if error is defined and error is not null %}
+                                <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+                            {% endif %}
+
+                            <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Email</label>
+                                <input type="email" value="{{ last_username | default('') }}" name="_username" id="username" class="form-control" autocomplete="email" required autofocus>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" name="_password" id="password" class="form-control" autocomplete="current-password" required>
+                            </div>
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+                            <button class="btn btn-primary w-100" type="submit">Sign in</button>
+                            <p class="mt-3">Don't have an account? <a href="#" id="showRegister">Create new one</a>.</p>
+                        </form>
+                    </div>
+
+                    <!-- Register Form -->
+                    <div id="registerForm" style="display: none;">
+                        <form action="{{ path('app_register') }}" method="post" class="needs-validation" novalidate>
+                            <div class="mb-3">
+                                <label for="registerEmail" class="form-label">Email:</label>
+                                <input type="email" id="registerEmail" name="email" class="form-control" required />
+                            </div>
+                            <div class="mb-3">
+                                <label for="registerPassword" class="form-label">Password:</label>
+                                <input type="password" id="registerPassword" name="password" class="form-control" required />
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="agreeTerms" name="agreeTerms" required />
+                                    <label class="form-check-label" for="agreeTerms">I agree to the terms and conditions</label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Register</button>
+                            <p class="mt-3">Already have an account? <a href="#" id="showLogin">Log in here</a>.</p>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
 </main>
 
 <footer class="bg-light text-center py-4 mt-5">
@@ -65,6 +123,56 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <!-- FullCalendar JavaScript -->
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.2/main.min.js'></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const openLoginPopup = document.getElementById('openLoginPopup');
+        const openRegisterPopup = document.getElementById('openRegisterPopup');
+        const showRegister = document.getElementById('showRegister'); // Ovaj element sada je definisan
+        const showLogin = document.getElementById('showLogin');
+
+        // Otvaranje register forme
+        if (openRegisterPopup) {
+            openRegisterPopup.addEventListener('click', function() {
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+                document.getElementById('authModalLabel').innerText = 'Register';
+            });
+        }
+
+        // Otvaranje login forme
+        if (openLoginPopup) {
+            openLoginPopup.addEventListener('click', function() {
+                loginForm.style.display = 'block';
+                registerForm.style.display = 'none';
+                document.getElementById('authModalLabel').innerText = 'Login';
+            });
+        }
+
+        // Prebacivanje sa login na register
+        if (showRegister) {
+            showRegister.addEventListener('click', function() {
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+                document.getElementById('authModalLabel').innerText = 'Register';
+            });
+        }
+
+        // Prebacivanje sa register na login
+        if (showLogin) {
+            showLogin.addEventListener('click', function() {
+                loginForm.style.display = 'block';
+                registerForm.style.display = 'none';
+                document.getElementById('authModalLabel').innerText = 'Login';
+            });
+        }
+    });
+
+
+
+</script>
+
 <!-- Custom JavaScript -->
 <script src="{{ asset('js/scripts.js') }}"></script>
 </body>

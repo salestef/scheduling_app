@@ -42,41 +42,33 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const isAuthenticated = {{ app.user ? 'true' : 'false' }};
             const calendarEl = document.getElementById('calendar');
             const calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'timeGridWeek',
-                events: '/backoffice/get-events',  // Ispravna ruta za učitavanje događaja
-                slotDuration: '01:00:00',  // Definisano vreme slota
+                events: '/backoffice/get-events',
+                slotDuration: '01:00:00',
                 allDaySlot: false,
 
-                // Automatsko popunjavanje vremena prilikom dodavanja slota
                 dateClick: function(info) {
-                    $('#slotModal').modal('show');
-                    $('#slotModalLabel').text('Add Slot');
-
-                    // Popunjavanje datuma
-                    $('#slotDate').val(info.dateStr);
-
-                    // Konvertovanje vremena na format 'HH:MM'
-                    const startTime = info.date.toTimeString().slice(0, 5);  // Vreme koje je kliknuto
-                    const endTime = new Date(info.date.getTime() + 60 * 60 * 1000).toTimeString().slice(0, 5);  // Krajnje vreme, sat kasnije
-
-                    // Popunjavanje vremena
-                    $('#start_time').val(startTime);
-                    $('#end_time').val(endTime);
-                },
-
-                // Otvaranje popupa za editovanje postojećeg slota
-                eventClick: function(info) {
-                    $('#slotModal').modal('show');
-                    $('#slotModalLabel').text('Edit Slot');
-                    $('#slotDate').val(info.event.start.toISOString().slice(0, 10));  // Popunjavanje datuma
-                    $('#start_time').val(info.event.start.toTimeString().slice(0, 5));  // Početno vreme
-                    $('#end_time').val(info.event.end.toTimeString().slice(0, 5));      // Krajnje vreme
+                    if (!isAuthenticated) {
+                        // Prikaži modal za login ako korisnik nije ulogovan
+                        $('#authModal').modal('show');
+                    } else {
+                        // Prikaži modal za zakazivanje termina ako je korisnik ulogovan
+                        $('#slotModal').modal('show');
+                        $('#slotModalLabel').text('Add Slot');
+                        $('#slotDate').val(info.dateStr);
+                        const startTime = info.date.toTimeString().slice(0, 5);
+                        const endTime = new Date(info.date.getTime() + 60 * 60 * 1000).toTimeString().slice(0, 5);
+                        $('#start_time').val(startTime);
+                        $('#end_time').val(endTime);
+                    }
                 }
             });
 
             calendar.render();
         });
+
     </script>
 {% endblock %}
