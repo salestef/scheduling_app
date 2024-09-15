@@ -6,11 +6,11 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-class ContactController extends AbstractController
+class ContactController extends BaseController
 {
     #[Route(path: '/contact', name: 'contact', methods: ['GET'])]
     public function index(): Response
     {
-        return $this->render('contact/index.html.twig');
+        return $this->renderTemplate('contact/index.html.twig');
     }
 }

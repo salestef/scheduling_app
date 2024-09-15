@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-class BookingController extends AbstractController
+class BookingController extends BaseController
 {
     #[Route('/booking', name: 'booking_index')]
     public function booking(EntityManagerInterface $em): Response
@@ -29,7 +29,7 @@ class BookingController extends AbstractController
             return $reservation->getSlot();
         }, $userReservations);
 
-        return $this->render('booking/booking.html.twig', [
+        return $this->renderTemplate('booking/booking.html.twig', [
             'availableSlots' => $availableSlots,
             'userReservations' => $userReservations,
             'reservedSlots' => $reservedSlots,
