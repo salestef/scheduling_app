@@ -62,9 +62,17 @@
                 eventClick: function(info) {
                     var slotId = info.event.extendedProps.id;
                     if (slotId) {
-                        document.getElementById('slotId').value = slotId;
-                        var myModal = new bootstrap.Modal(document.getElementById('reservationModal'));
-                        myModal.show();
+                        if ({{ app.user ? 'true' : 'false' }}) {
+                            document.getElementById('slotId').value = slotId;
+                            var myModal = new bootstrap.Modal(document.getElementById('reservationModal'));
+                            myModal.show();
+                        } else {
+                            // Otvori login popup
+                            var loginModal = new bootstrap.Modal(document.getElementById('authModal'));
+                            loginModal.show();
+                            // Dodaj parametar za povratak nakon prijave
+                            sessionStorage.setItem('redirectAfterLogin', '/booking');
+                        }
                     }
                 }
             });
@@ -89,5 +97,6 @@
 
             calendar.render();
         });
+
     </script>
 {% endblock %}

@@ -138,10 +138,9 @@
         const registerForm = document.getElementById('registerForm');
         const openLoginPopup = document.getElementById('openLoginPopup');
         const openRegisterPopup = document.getElementById('openRegisterPopup');
-        const showRegister = document.getElementById('showRegister'); // Ovaj element sada je definisan
+        const showRegister = document.getElementById('showRegister');
         const showLogin = document.getElementById('showLogin');
 
-        // Otvaranje register forme
         if (openRegisterPopup) {
             openRegisterPopup.addEventListener('click', function() {
                 loginForm.style.display = 'none';
@@ -150,7 +149,6 @@
             });
         }
 
-        // Otvaranje login forme
         if (openLoginPopup) {
             openLoginPopup.addEventListener('click', function() {
                 loginForm.style.display = 'block';
@@ -159,7 +157,6 @@
             });
         }
 
-        // Prebacivanje sa login na register
         if (showRegister) {
             showRegister.addEventListener('click', function() {
                 loginForm.style.display = 'none';
@@ -168,7 +165,6 @@
             });
         }
 
-        // Prebacivanje sa register na login
         if (showLogin) {
             showLogin.addEventListener('click', function() {
                 loginForm.style.display = 'block';
@@ -176,7 +172,15 @@
                 document.getElementById('authModalLabel').innerText = 'Login';
             });
         }
+
+        // Preusmeravanje nakon prijave
+        const redirectAfterLogin = sessionStorage.getItem('redirectAfterLogin');
+        if (redirectAfterLogin && window.location.pathname === '/login') {
+            sessionStorage.removeItem('redirectAfterLogin');
+            window.location.href = redirectAfterLogin;
+        }
     });
+
 
 
 
