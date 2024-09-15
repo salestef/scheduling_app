@@ -3,6 +3,16 @@
 {% block body %}
     <h1>Manage Schedule</h1>
 
+    <!-- Dropdown za odabir proizvoda -->
+    <div class="mb-3">
+        <label for="product-select" class="form-label">Select Product</label>
+        <select id="product-select" class="form-select">
+            {% for product in products %}
+                <option value="{{ product.id }}">{{ product.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
     <!-- Modal za dodavanje/izmenu slota -->
     <div class="modal fade" id="slotModal" tabindex="-1" aria-labelledby="slotModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -12,18 +22,31 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form method="post" id="slotForm">
+                    <input type="hidden" id="slotId" name="id">  <!-- Skriveni ID za slot -->
                     <div class="modal-body">
                         <input type="hidden" id="slotDate" name="date">
+                        <input type="hidden" id="productId" name="product_id">
+                        <!-- Start Time i End Time -->
                         <div class="mb-3">
                             <label for="start_time" class="form-label">Start Time</label>
-                            <input type="time" class="form-control" id="start_time" name="start_time" required>
+                            <input type="time" class="form-control" id="start_time" name="start_time" step="3600" required>
                         </div>
                         <div class="mb-3">
                             <label for="end_time" class="form-label">End Time</label>
-                            <input type="time" class="form-control" id="end_time" name="end_time" required>
+                            <input type="time" class="form-control" id="end_time" name="end_time" step="3600" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Status</label>
+                            <select id="status" class="form-select" name="status">
+                                <option value="open">Open</option>
+                                <option value="booked">Booked</option>
+                                <option value="approved">Approved</option>
+                                <option value="paid">Paid</option>
+                            </select>
                         </div>
                     </div>
                     <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" id="deleteSlot">Delete Slot</button>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-primary">Save Slot</button>
                     </div>
@@ -42,33 +65,74 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const isAuthenticated = {{ app.user ? 'true' : 'false' }};
             const calendarEl = document.getElementById('calendar');
             const calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'timeGridWeek',
-                events: '/backoffice/get-events',
-                slotDuration: '01:00:00',
-                allDaySlot: false,
-
+                initialView: 'timeGridDay',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                slotDuration: '01:00:00',  // Intervali od 60 minuta
+                events: function(fetchInfo, successCallback, failureCallback) {
+                    const productId = document.getElementById('product-select').value;
+                    $.post('/backoffice/get-slots', { product_id: productId }, function(data) {
+                        successCallback(data);
+                    });
+                },
                 dateClick: function(info) {
-                    if (!isAuthenticated) {
-                        // Prikaži modal za login ako korisnik nije ulogovan
-                        $('#authModal').modal('show');
-                    } else {
-                        // Prikaži modal za zakazivanje termina ako je korisnik ulogovan
-                        $('#slotModal').modal('show');
-                        $('#slotModalLabel').text('Add Slot');
-                        $('#slotDate').val(info.dateStr);
-                        const startTime = info.date.toTimeString().slice(0, 5);
-                        const endTime = new Date(info.date.getTime() + 60 * 60 * 1000).toTimeString().slice(0, 5);
-                        $('#start_time').val(startTime);
-                        $('#end_time').val(endTime);
-                    }
+                    const clickedTime = new Date(info.dateStr);
+                    const hours = clickedTime.getHours();
+                    $('#slotModal').modal('show');
+                    $('#slotModalLabel').text('Add Slot');
+                    $('#slotForm').trigger("reset");
+                    $('#slotId').val('');
+                    $('#slotDate').val(info.dateStr);
+                    $('#productId').val($('#product-select').val());
+                    $('#start_time').val(hours.toString().padStart(2, '0') + ':00');  // Zaokruži na ceo sat
+                    $('#end_time').val((hours + 1).toString().padStart(2, '0') + ':00');
+                    $('#status').val('open');
+                },
+                eventClick: function(info) {
+                    $('#slotModal').modal('show');
+                    $('#slotModalLabel').text('Edit Slot');
+                    $('#slotForm').trigger("reset");
+                    $('#slotId').val(info.event.id);
+                    $('#slotDate').val(info.event.startStr);
+                    $('#start_time').val(info.event.start.toTimeString().slice(0, 5));
+                    $('#end_time').val(info.event.end.toTimeString().slice(0, 5));
+                    $('#status').val(info.event.extendedProps.status);
+                    $('#productId').val(info.event.extendedProps.productId);
                 }
             });
 
             calendar.render();
-        });
 
+            $('#product-select').on('change', function() {
+                calendar.refetchEvents();
+            });
+
+            $('#slotForm').on('submit', function(e) {
+                e.preventDefault();
+                const slotData = $(this).serialize();
+                $.post('/backoffice/save-slot', slotData, function(response) {
+                    $('#slotModal').modal('hide');
+                    calendar.refetchEvents();
+                });
+            });
+
+            $('#deleteSlot').on('click', function() {
+                const slotId = $('#slotId').val();
+                if (slotId) {
+                    $.post('/backoffice/delete-slot', { id: slotId }, function(response) {
+                        if (response.success) {
+                            $('#slotModal').modal('hide');
+                            calendar.refetchEvents();
+                        }
+                    });
+                }
+            });
+        });
     </script>
+
 {% endblock %}

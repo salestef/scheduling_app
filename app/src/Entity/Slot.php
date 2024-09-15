@@ -25,14 +25,20 @@ class Slot
     #[ORM\Column(type: Types::TIME_MUTABLE)]
     private ?\DateTimeInterface $endTime = null;
 
-    #[ORM\Column]
-    private ?bool $isAvailable = null;
-
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'slots')]
     private ?User $createdBy = null;
 
-    #[ORM\OneToOne(mappedBy: 'slot')]
-    private ?Reservation $reservation = null;
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    private ?User $user = null; // Nullable, jer slot može biti slobodan
+
+    #[ORM\ManyToOne(targetEntity: Product::class)]
+    private ?Product $product = null;
+
+    #[ORM\OneToMany(targetEntity: Reservation::class, mappedBy:"slot", orphanRemoval:true)]
+    private Collection $reservations;
+
+    #[ORM\Column(length: 50)]
+    private ?string $status = 'open';
 
     public function __construct()
     {
@@ -86,18 +92,6 @@ class Slot
         return $this;
     }
 
-    public function isAvailable(): ?bool
-    {
-        return $this->isAvailable;
-    }
-
-    public function setIsAvailable(bool $isAvailable): static
-    {
-        $this->isAvailable = $isAvailable;
-
-        return $this;
-    }
-
     public function getCreatedBy(): ?User
     {
         return $this->createdBy;
@@ -110,14 +104,59 @@ class Slot
         return $this;
     }
 
-    public function getReservation(): ?Reservation
+    public function getUser(): ?User
     {
-        return $this->reservation;
+        return $this->user;
     }
 
-    public function setReservation(?Reservation $reservation): static
+    public function setUser(?User $user): void
     {
-        $this->reservation = $reservation;
+        $this->user = $user;
+    }
+
+    public function getProduct(): ?Product
+    {
+        return $this->product;
+    }
+
+    public function setProduct(?Product $product): void
+    {
+        $this->product = $product;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(?string $status): void
+    {
+        $this->status = $status;
+    }
+
+    public function getReservations(): Collection
+    {
+        return $this->reservations;
+    }
+
+    public function addReservation(Reservation $reservation): self
+    {
+        if (!$this->reservations->contains($reservation)) {
+            $this->reservations[] = $reservation;
+            $reservation->setSlot($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReservation(Reservation $reservation): self
+    {
+        if ($this->reservations->removeElement($reservation)) {
+            // Postavi vezu unazad na null
+            if ($reservation->getSlot() === $this) {
+                $reservation->setSlot(null);
+            }
+        }
 
         return $this;
     }

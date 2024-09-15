@@ -16,12 +16,15 @@ class Reservation
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
-    #[ORM\OneToOne(inversedBy: 'reservation')]
-    #[ORM\JoinColumn(nullable: false)] // slot mora biti obavezno polje
+    #[ORM\ManyToOne(targetEntity: Slot::class, inversedBy: 'reservations')]
+    #[ORM\JoinColumn(nullable: false)]
     private ?Slot $slot = null;
 
+    #[ORM\Column]
+    private ?float $price = null;
+
     #[ORM\Column(length: 255)]
-    private ?string $status = null;
+    private ?string $status = 'pending'; // Status može biti 'pending', 'confirmed', 'paid', itd.
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -54,7 +57,7 @@ class Reservation
         return $this->slot;
     }
 
-    public function setSlot(?Slot $slot): static
+    public function setSlot(?Slot $slot): self
     {
         $this->slot = $slot;
 
@@ -81,6 +84,18 @@ class Reservation
     public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getPrice(): ?float
+    {
+        return $this->price;
+    }
+
+    public function setPrice(float $price): static
+    {
+        $this->price = $price;
 
         return $this;
     }
