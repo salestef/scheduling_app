@@ -1,0 +1,64 @@
+{% extends 'backoffice/backoffice.html.twig' %}
+
+{% block title %}Add New Product{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        <h1 class="mb-4">Add New Product</h1>
+
+        {{ form_start(form) }}
+        <div class="form-group mt-3">
+            {{ form_label(form.name) }}
+            {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.name) }}
+        </div>
+
+        <div class="form-group mt-3">
+            {{ form_label(form.shortDesc) }}
+            {{ form_widget(form.shortDesc, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.shortDesc) }}
+        </div>
+
+        <div class="form-group mt-3">
+            {{ form_label(form.longDesc) }}
+            {{ form_widget(form.longDesc, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.longDesc) }}
+        </div>
+
+        <div class="form-group mt-3">
+            {{ form_label(form.price) }}
+            {{ form_widget(form.price, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.price) }}
+        </div>
+
+        <div class="form-group mt-3">
+            {{ form_label(form.img) }}
+            {{ form_widget(form.img, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.img) }}
+        </div>
+
+        <button type="submit" class="btn btn-success mt-4">Create Product</button>
+        {{ form_end(form) }}
+    </div>
+
+    <style>
+        @media (max-width: 768px) {
+            .container {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .form-group {
+                margin-bottom: 1.5rem;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+{% endblock %}

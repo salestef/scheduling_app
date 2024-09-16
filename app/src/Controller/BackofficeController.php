@@ -6,6 +6,7 @@ use App\Entity\Product;
 use App\Entity\Reservation;
 use App\Entity\Slot;
 use App\Entity\User;
+use App\Form\ProductType;
 use App\Repository\ReservationRepository;
 use App\Repository\SlotRepository;
 use App\Repository\UserRepository;
@@ -18,10 +19,12 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\RequestStack;
 
-class BackofficeController extends AbstractController
+class BackofficeController extends BaseController
 {
     public function __construct(
+        RequestStack $requestStack,
         public readonly UserRepository $userRepository,
         public readonly SlotRepository $slotRepository,
         public readonly ReservationRepository $reservationRepository,
@@ -29,6 +32,7 @@ class BackofficeController extends AbstractController
         public readonly ReservationService $reservationService,
     )
     {
+        parent::__construct($requestStack);
     }
 
     #[Route('/backoffice', name: 'backoffice_index')]
@@ -346,14 +350,77 @@ class BackofficeController extends AbstractController
         ]);
     }
 
-    #[Route('/backoffice/reservations/{id}/approve', name: 'reservation_approve')]
-    public function approve(Reservation $reservation, EntityManagerInterface $em): Response
+    #[Route('/backoffice/products', name: 'backoffice_products')]
+    public function listProducts(EntityManagerInterface $em): Response
     {
-        $reservation->setStatus('approved');
-        $reservation->getSlot()->setIsAvailable(false);
+        $products = $em->getRepository(Product::class)->findAll();
 
+        return $this->render('backoffice/products/index.html.twig', [
+            'products' => $products,
+        ]);
+    }
+
+    #[Route('/backoffice/product/add', name: 'backoffice_add_product')]
+    public function addProduct(Request $request, EntityManagerInterface $em): Response
+    {
+        $product = new Product();
+        $form = $this->createForm(ProductType::class, $product);
+
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Upload slike
+            $imageFile = $form->get('img')->getData();
+            if ($imageFile) {
+                $newFilename = uniqid() . '.' . $imageFile->guessExtension();
+                $imageFile->move($this->getParameter('product_images_directory'), $newFilename);
+                $product->setImg('/product/' . $newFilename);
+            }
+
+            $em->persist($product);
+            $em->flush();
+
+            return $this->redirectToRoute('backoffice_products');
+        }
+
+        return $this->render('backoffice/products/add.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/backoffice/product/edit/{id}', name: 'backoffice_edit_product')]
+    public function editProduct(Product $product, Request $request, EntityManagerInterface $em): Response
+    {
+        $form = $this->createForm(ProductType::class, $product);
+
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Upload nove slike ako postoji
+            $imageFile = $form->get('img')->getData();
+            if ($imageFile) {
+                $newFilename = uniqid() . '.' . $imageFile->guessExtension();
+                $imageFile->move($this->getParameter('product_images_directory'), $newFilename);
+                $product->setImg('/product/' . $newFilename);
+            }
+
+            $em->flush();
+
+            return $this->redirectToRoute('backoffice_products');
+        }
+
+        return $this->render('backoffice/products/edit.html.twig', [
+            'form' => $form->createView(),
+            'product' => $product,
+        ]);
+    }
+
+    #[Route('/backoffice/product/delete/{id}', name: 'backoffice_delete_product')]
+    public function deleteProduct(Product $product, EntityManagerInterface $em): RedirectResponse
+    {
+        $em->remove($product);
         $em->flush();
 
-        return $this->redirectToRoute('backoffice_reservations');
+        return $this->redirectToRoute('backoffice_products');
     }
+
+
 }

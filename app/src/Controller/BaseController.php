@@ -8,7 +8,7 @@ use App\Form\RegistrationFormType;
 
 class BaseController extends AbstractController
 {
-    private $requestStack;
+    public $requestStack;
 
     public function __construct(RequestStack $requestStack)
     {
