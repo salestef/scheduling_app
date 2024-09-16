@@ -44,6 +44,7 @@ security:
         - { path: ^/booking, roles: PUBLIC_ACCESS }
         - { path: ^/about-us, roles: PUBLIC_ACCESS }
         - { path: ^/contact, roles: PUBLIC_ACCESS }
+        - { path: ^/products, roles: PUBLIC_ACCESS }
 
         # Restrict access to the backoffice route to admin users
         - { path: ^/backoffice, roles: ROLE_ADMIN } # Adjust `/backoffice` as necessary

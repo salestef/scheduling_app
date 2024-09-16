@@ -1,10 +1,16 @@
-{# templates/booking/booking.html.twig #}
 {% extends 'base.html.twig' %}
 
 {% block body %}
-    <h1>Book a Slot</h1>
+    <h1>Book a Slot for {{ product.getName() }}</h1>
+    <p>Price: {{ product.getPrice() }} USD</p>
 
     <div id="calendar"></div>
+
+    <div class="btn-group mt-3" role="group" aria-label="Calendar views">
+        <button type="button" class="btn btn-outline-primary" id="dayView">Day</button>
+        <button type="button" class="btn btn-outline-primary" id="weekView">Week</button>
+        <button type="button" class="btn btn-outline-primary" id="monthView">Month</button>
+    </div>
 
     <!-- Modal for reservation confirmation -->
     <div class="modal fade" id="reservationModal" tabindex="-1" aria-labelledby="reservationModalLabel" aria-hidden="true">
@@ -15,7 +21,8 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p>Are you sure you want to reserve this slot?</p>
+                    <p>Are you sure you want to reserve this slot for {{ product.getName() }}?</p>
+                    <p>Price: {{ product.getPrice() }} USD</p>
                     <input type="hidden" id="slotId" />
                 </div>
                 <div class="modal-footer">
@@ -30,14 +37,14 @@
         document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
             var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
+                initialView: 'dayGridDay', // Default to day view
                 events: [
                     {% for slot in availableSlots %}
                     {
                         title: 'Available',
                         start: '{{ slot.date|date('Y-m-d') }}T{{ slot.startTime|date('H:i') }}',
                         end: '{{ slot.date|date('Y-m-d') }}T{{ slot.endTime|date('H:i') }}',
-                        backgroundColor: '#28a745', // Green for available slots
+                        backgroundColor: '#28a745',
                         borderColor: '#28a745',
                         url: '#',
                         extendedProps: {
@@ -46,18 +53,20 @@
                     },
                     {% endfor %}
 
-                    {% for reservation in userReservations %}
+                    {% if app.user %}
+                    {% for slot in userReservedSlots %}
                     {
                         title: 'Reserved by You',
-                        start: '{{ reservation.slot.date|date('Y-m-d') }}T{{ reservation.slot.startTime|date('H:i') }}',
-                        end: '{{ reservation.slot.date|date('Y-m-d') }}T{{ reservation.slot.endTime|date('H:i') }}',
-                        backgroundColor: '#dc3545', // Red for reserved slots
+                        start: '{{ slot.date|date('Y-m-d') }}T{{ slot.startTime|date('H:i') }}',
+                        end: '{{ slot.date|date('Y-m-d') }}T{{ slot.endTime|date('H:i') }}',
+                        backgroundColor: '#dc3545',
                         borderColor: '#dc3545',
                         extendedProps: {
-                            status: '{{ reservation.status }}'
+                            id: '{{ slot.id }}'
                         }
                     },
                     {% endfor %}
+                    {% endif %}
                 ],
                 eventClick: function(info) {
                     var slotId = info.event.extendedProps.id;
@@ -67,18 +76,27 @@
                             var myModal = new bootstrap.Modal(document.getElementById('reservationModal'));
                             myModal.show();
                         } else {
-                            // Otvori login popup
                             var loginModal = new bootstrap.Modal(document.getElementById('authModal'));
                             loginModal.show();
-                            // Dodaj parametar za povratak nakon prijave
-                            sessionStorage.setItem('redirectAfterLogin', '/booking');
                         }
                     }
                 }
             });
 
+            document.getElementById('dayView').addEventListener('click', function() {
+                calendar.changeView('dayGridDay');
+            });
+
+            document.getElementById('weekView').addEventListener('click', function() {
+                calendar.changeView('dayGridWeek');
+            });
+
+            document.getElementById('monthView').addEventListener('click', function() {
+                calendar.changeView('dayGridMonth');
+            });
+
             document.getElementById('confirmReservation').addEventListener('click', function() {
-                var slotId = document.getElementById('slotId').value;
+                var slotId = parseInt(document.getElementById('slotId').value, 10); // osigurava da je slotId broj
                 if (slotId) {
                     fetch('{{ path('booking_reserve') }}?slot=' + slotId, {
                         method: 'POST',
@@ -97,6 +115,5 @@
 
             calendar.render();
         });
-
     </script>
 {% endblock %}

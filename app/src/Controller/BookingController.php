@@ -3,6 +3,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Product;
 use App\Entity\Reservation;
 use App\Entity\Slot;
 use Doctrine\ORM\EntityManagerInterface;
@@ -36,6 +37,27 @@ class BookingController extends BaseController
         ]);
     }
 
+    #[Route('/booking/product/{id}', name: 'book_product')]
+    public function bookProduct(int $id, EntityManagerInterface $em): Response
+    {
+//        dd('sta ces ovde');
+        $user = $this->getUser();
+
+        $product = $em->getRepository(Product::class)->find($id);
+
+        // Get available slots for this product
+        $availableSlots = $em->getRepository(Slot::class)->findBy(['product' => $product]);
+
+        // Get slots reserved by this user
+        $userReservedSlots = $user ? $em->getRepository(Slot::class)->findBy(['user' => $user, 'product' => $product]) : [];
+
+        return $this->renderTemplate('booking/booking.html.twig', [
+            'product' => $product,
+            'availableSlots' => $availableSlots,
+            'userReservedSlots' => $userReservedSlots,
+        ]);
+    }
+
     #[Route('/booking/reserve', name: 'booking_reserve', methods: ['POST'])]
     public function reserve(Request $request, EntityManagerInterface $em): Response
     {
@@ -46,17 +68,10 @@ class BookingController extends BaseController
             return new Response('Invalid request', Response::HTTP_BAD_REQUEST);
         }
 
-        $reservation = new Reservation();
-        $reservation->setUser($this->getUser());
-        $reservation->setSlot($slot);
-        $reservation->setStatus('pending');
-//        $reservation->setCreatedAt(new \D()); // Ensure createdAt is set
-
-        $em->persist($reservation);
-
-        // Mark the slot as unavailable
-        $slot->setIsAvailable(false);
-
+        // Set the slot as reserved
+//        $slot->setIsAvailable(false);
+        $slot->setUser($this->getUser());
+        $slot->setStatus('booked');
         $em->flush();
 
         return new Response('Reservation made', Response::HTTP_OK);
