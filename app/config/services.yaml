@@ -37,3 +37,7 @@ services:
             $urlGenerator: '@router'
         tags:
             - { name: 'monolog.logger', channel: 'security' }
+
+    App\Controller\BaseController:
+        arguments:
+            $requestStack: '@request_stack'

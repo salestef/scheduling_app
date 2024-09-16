@@ -22,10 +22,9 @@ security:
             form_login:
                 login_path: app_login
                 check_path: app_login
-                default_target_path: booking_index
-                enable_csrf: true
-                # Custom redirect based on role
+                default_target_path: home_index # Možeš postaviti default na `home_index` ili `booking_index`
                 success_handler: App\Security\LoginSuccessHandler
+                always_use_default_target_path: false
             logout:
                 path: app_logout
                 # where to redirect after logout
