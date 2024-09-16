@@ -34,7 +34,7 @@ class Slot
     #[ORM\ManyToOne(targetEntity: Product::class)]
     private ?Product $product = null;
 
-    #[ORM\OneToMany(targetEntity: Reservation::class, mappedBy:"slot", orphanRemoval:true)]
+    #[ORM\OneToMany(targetEntity: Reservation::class, mappedBy:"slot")]
     private Collection $reservations;
 
     #[ORM\Column(length: 50)]

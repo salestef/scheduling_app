@@ -14,7 +14,7 @@ final class Version20240912193720 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return 'Slot and Reservation init with updated fields';
+        return 'Slot and Reservation init with updated fields, removing unique constraint on slot_id';
     }
 
     public function up(Schema $schema): void
@@ -25,8 +25,8 @@ final class Version20240912193720 extends AbstractMigration
         $this->addSql('ALTER TABLE slot ADD CONSTRAINT FK_slot_user_id FOREIGN KEY (user_id) REFERENCES `user` (id)');
         $this->addSql('ALTER TABLE slot ADD CONSTRAINT FK_slot_product_id FOREIGN KEY (product_id) REFERENCES product (id)');
 
-        // Kreiranje tabele reservation
-        $this->addSql('CREATE TABLE reservation (id INT AUTO_INCREMENT NOT NULL, user_id INT NOT NULL, slot_id INT NOT NULL, status VARCHAR(255) NOT NULL, price DOUBLE PRECISION NOT NULL, created_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\', UNIQUE INDEX UNIQ_reservation_slot_id (slot_id), INDEX IDX_reservation_user_id (user_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
+        // Kreiranje tabele reservation, bez jedinstvenog indeksa za slot_id
+        $this->addSql('CREATE TABLE reservation (id INT AUTO_INCREMENT NOT NULL, user_id INT DEFAULT NULL, slot_id INT NOT NULL, status VARCHAR(255) NOT NULL, price DOUBLE PRECISION NOT NULL, created_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\', INDEX IDX_reservation_slot_id (slot_id), INDEX IDX_reservation_user_id (user_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('ALTER TABLE reservation ADD CONSTRAINT FK_reservation_slot_id FOREIGN KEY (slot_id) REFERENCES slot (id)');
         $this->addSql('ALTER TABLE reservation ADD CONSTRAINT FK_reservation_user_id FOREIGN KEY (user_id) REFERENCES `user` (id)');
     }

@@ -9,6 +9,7 @@ use App\Entity\User;
 use App\Repository\ReservationRepository;
 use App\Repository\SlotRepository;
 use App\Repository\UserRepository;
+use App\Slot\ReservationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -23,6 +24,7 @@ class BackofficeController extends AbstractController
         public readonly SlotRepository $slotRepository,
         public readonly ReservationRepository $reservationRepository,
         public readonly EntityManagerInterface $em,
+        public readonly ReservationService $reservationService,
     )
     {
     }
@@ -62,9 +64,17 @@ class BackofficeController extends AbstractController
                 default => 'gray',
             };
 
+            // Proveri da li postoji rezervacija za ovaj slot
+//            $reservation = $this->reservationRepository->findOneBy(['slot' => $slot]);
+
+            $slotUser = $slot->getUser();
+
+            // Ako postoji rezervacija, prikaži email korisnika, u suprotnom prikaži status
+            $title = $slotUser ? $slotUser->getEmail() : 'Slot: ' . $slot->getStatus();
+
             $events[] = [
                 'id' => $slot->getId(),  // Dodaj ID slota
-                'title' => 'Slot: ' . $slot->getStatus(),
+                'title' => $title,       // Prikaži email korisnika ili status
                 'start' => $slot->getDate()->format('Y-m-d') . 'T' . $slot->getStartTime()->format('H:i:s'),
                 'end' => $slot->getDate()->format('Y-m-d') . 'T' . $slot->getEndTime()->format('H:i:s'),
                 'color' => $color,
@@ -77,6 +87,7 @@ class BackofficeController extends AbstractController
 
         return new JsonResponse($events);
     }
+
 
     #[Route('/backoffice/save-slot', name: 'save_slot', methods: ['POST'])]
     public function saveSlot(Request $request, EntityManagerInterface $em): JsonResponse
@@ -118,23 +129,7 @@ class BackofficeController extends AbstractController
         $slot->setStatus($request->get('status'));
         $slot->setProduct($product);
 
-        // Ako slot postane rezervisan (nije "open"), kreiraj rezervaciju
-        if ($slot->getStatus() !== 'open') {
-
-            if($slot->getReservations()->count() > 0){
-                $reservation = $slot->getReservations()->first();
-            }else{
-                $reservation = new Reservation();
-                $reservation->setSlot($slot);
-                $reservation->setUser($slot->getUser());
-            }
-
-            $reservation
-                ->setPrice($product->getPrice())
-                ->setStatus($slot->getStatus()); // Status rezervacije
-
-            $em->persist($reservation);
-        }
+        $this->reservationService->make($slot);
 
         if (!$slotId) {
             $slot->setCreatedBy($this->getUser());

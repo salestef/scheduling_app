@@ -6,14 +6,24 @@ namespace App\Controller;
 use App\Entity\Product;
 use App\Entity\Reservation;
 use App\Entity\Slot;
+use App\Slot\ReservationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class BookingController extends BaseController
 {
+    public function __construct(
+        RequestStack $requestStack,
+        private readonly ReservationService $reservationService,
+    )
+    {
+        parent::__construct($requestStack);
+    }
+
     #[Route('/booking', name: 'booking_index')]
     public function booking(EntityManagerInterface $em): Response
     {
@@ -79,10 +89,11 @@ class BookingController extends BaseController
         }
 
         // Set the slot as reserved
-//        $slot->setIsAvailable(false);
         $slot->setUser($this->getUser());
         $slot->setStatus('booked');
         $em->flush();
+
+        $this->reservationService->make($slot);
 
         return new Response('Reservation made', Response::HTTP_OK);
     }
