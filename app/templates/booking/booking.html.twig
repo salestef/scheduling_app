@@ -39,34 +39,19 @@
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridDay', // Default to day view
                 events: [
-                    {% for slot in availableSlots %}
+                    {% for slot in slots %}
                     {
-                        title: 'Available',
-                        start: '{{ slot.date|date('Y-m-d') }}T{{ slot.startTime|date('H:i') }}',
-                        end: '{{ slot.date|date('Y-m-d') }}T{{ slot.endTime|date('H:i') }}',
-                        backgroundColor: '#28a745',
-                        borderColor: '#28a745',
+                        title: '{{ slot.title }}',
+                        start: '{{ slot.start }}',
+                        end: '{{ slot.end }}',
+                        backgroundColor: '{{ slot.backgroundColor }}',
+                        borderColor: '{{ slot.borderColor }}',
                         url: '#',
                         extendedProps: {
                             id: '{{ slot.id }}'
                         }
                     },
                     {% endfor %}
-
-                    {% if app.user %}
-                    {% for slot in userReservedSlots %}
-                    {
-                        title: 'Reserved by You',
-                        start: '{{ slot.date|date('Y-m-d') }}T{{ slot.startTime|date('H:i') }}',
-                        end: '{{ slot.date|date('Y-m-d') }}T{{ slot.endTime|date('H:i') }}',
-                        backgroundColor: '#dc3545',
-                        borderColor: '#dc3545',
-                        extendedProps: {
-                            id: '{{ slot.id }}'
-                        }
-                    },
-                    {% endfor %}
-                    {% endif %}
                 ],
                 eventClick: function(info) {
                     var slotId = info.event.extendedProps.id;

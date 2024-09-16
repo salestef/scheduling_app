@@ -117,15 +117,22 @@ class BackofficeController extends AbstractController
         $slot->setEndTime($endTime);
         $slot->setStatus($request->get('status'));
         $slot->setProduct($product);
-        $slot->setUser($this->getUser());
 
         // Ako slot postane rezervisan (nije "open"), kreiraj rezervaciju
         if ($slot->getStatus() !== 'open') {
-            $reservation = new Reservation();
-            $reservation->setSlot($slot);
-            $reservation->setUser($slot->getUser());
-            $reservation->setPrice($product->getPrice()); // Podaci o ceni
-            $reservation->setStatus($slot->getStatus()); // Status rezervacije
+
+            if($slot->getReservations()->count() > 0){
+                $reservation = $slot->getReservations()->first();
+            }else{
+                $reservation = new Reservation();
+                $reservation->setSlot($slot);
+                $reservation->setUser($slot->getUser());
+            }
+
+            $reservation
+                ->setPrice($product->getPrice())
+                ->setStatus($slot->getStatus()); // Status rezervacije
+
             $em->persist($reservation);
         }
 

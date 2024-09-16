@@ -40,23 +40,33 @@ class BookingController extends BaseController
     #[Route('/booking/product/{id}', name: 'book_product')]
     public function bookProduct(int $id, EntityManagerInterface $em): Response
     {
-//        dd('sta ces ovde');
         $user = $this->getUser();
 
         $product = $em->getRepository(Product::class)->find($id);
 
-        // Get available slots for this product
-        $availableSlots = $em->getRepository(Slot::class)->findBy(['product' => $product]);
+        // Get all slots for this product
+        $slots = $em->getRepository(Slot::class)->findBy(['product' => $product]);
 
-        // Get slots reserved by this user
-        $userReservedSlots = $user ? $em->getRepository(Slot::class)->findBy(['user' => $user, 'product' => $product]) : [];
+        // Prepare array to store slot data
+        $slotData = [];
+        foreach ($slots as $slot) {
+            $isReservedByUser = $user && $slot->getUser() === $user;
+            $slotData[] = [
+                'id' => $slot->getId(),
+                'title' => $isReservedByUser ? 'Reserved by You' : 'Available',
+                'start' => $slot->getDate()->format('Y-m-d') . 'T' . $slot->getStartTime()->format('H:i'),
+                'end' => $slot->getDate()->format('Y-m-d') . 'T' . $slot->getEndTime()->format('H:i'),
+                'backgroundColor' => $isReservedByUser ? '#dc3545' : '#28a745',
+                'borderColor' => $isReservedByUser ? '#dc3545' : '#28a745'
+            ];
+        }
 
         return $this->renderTemplate('booking/booking.html.twig', [
             'product' => $product,
-            'availableSlots' => $availableSlots,
-            'userReservedSlots' => $userReservedSlots,
+            'slots' => $slotData,
         ]);
     }
+
 
     #[Route('/booking/reserve', name: 'booking_reserve', methods: ['POST'])]
     public function reserve(Request $request, EntityManagerInterface $em): Response
