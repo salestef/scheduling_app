@@ -33,6 +33,11 @@
 
         <div class="form-group mt-3">
             {{ form_label(form.img) }}
+            {% if form.vars.value.img is not empty %}
+                <div class="mb-3">
+                    <img src="{{ asset('img/' ~ form.vars.value.img) }}" alt="Current Image" style="max-width: 300px; max-height: 300px; object-fit: contain;">
+                </div>
+            {% endif %}
             {{ form_widget(form.img, {'attr': {'class': 'form-control'}}) }}
             {{ form_errors(form.img) }}
         </div>
