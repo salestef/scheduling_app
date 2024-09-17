@@ -5,6 +5,7 @@
 {% block title %}Welcome to Paddle Tennis{% endblock %}
 
 {% block body %}
+    <!-- Jumbotron with call to action -->
     <div class="jumbotron text-center" style="background-image: url('{{ asset('img/padel3.jpg') }}'); background-size: cover; background-position: center; height: 60vh;">
         <div class="d-flex flex-column justify-content-center align-items-center h-100 text-white">
             <h1 class="display-4">Welcome to Paddle Tennis</h1>
@@ -13,20 +14,55 @@
         </div>
     </div>
 
+    <!-- Textual Section -->
     <div class="container mt-5">
-        <section class="my-5">
-            <h2 class="text-center">About Padel Tennis</h2>
-            <p>Padel tennis is a fun and social sport that combines elements of tennis and squash. It's played in doubles on an enclosed court about one-third the size of a tennis court.</p>
-        </section>
-
-        <section class="my-5">
-            <h2 class="text-center">Why Choose Us?</h2>
-            <p>Our facilities provide top-tier padel courts, professional coaching, and a welcoming community for all skill levels. Book a court now and experience the best of padel tennis!</p>
-        </section>
-
-        <section class="my-5">
-            <h2 class="text-center">Location</h2>
-            <p class="text-center">Find us at 123 Padel Lane, Sports City. We are open from 8 AM to 10 PM every day!</p>
+        <section class="text-center my-5">
+            <h2>Discover the Joy of Padel</h2>
+            <p>Padel tennis is not just a sport; it's a lifestyle. Embrace the excitement and challenge of this fast-paced game that brings people together. Whether you are a seasoned player or new to the game, our facilities are designed to cater to all skill levels.</p>
+            <p>Come and experience the thrill of padel tennis in a friendly and dynamic environment!</p>
         </section>
     </div>
+
+    <!-- About Padel Tennis Section -->
+    <div class="container mt-5">
+        <section class="my-5">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h2>About Padel Tennis</h2>
+                    <p>Padel tennis is a fun and social sport that combines elements of tennis and squash. It's played in doubles on an enclosed court about one-third the size of a tennis court.</p>
+                </div>
+                <div class="col-md-6">
+                    <img src="{{ asset('img/padel7.jpg') }}" alt="Padel court" class="img-fluid rounded shadow-sm">
+                </div>
+            </div>
+        </section>
+
+        <!-- Why Choose Us Section -->
+        <section class="my-5">
+            <div class="row align-items-center">
+                <div class="col-md-6 order-md-2">
+                    <h2>Why Choose Us?</h2>
+                    <p>Our facilities provide top-tier padel courts, professional coaching, and a welcoming community for all skill levels. Join us and experience the best of padel tennis!</p>
+                </div>
+                <div class="col-md-6 order-md-1">
+                    <img src="{{ asset('img/padel9.jpg') }}" alt="Players on padel court" class="img-fluid rounded shadow-sm">
+                </div>
+            </div>
+        </section>
+
+        <!-- Location Section -->
+        <section class="my-5">
+            <h2 class="text-center">Location</h2>
+            <div class="card border-light shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Find Us</h5>
+                    <p class="text-center">123 Padel Lane, Sports City. Open from 8 AM to 10 PM every day!</p>
+                    <div class="text-center">
+                        <a href="https://www.google.com/maps?q=123+Padel+Lane,+Sports+City" target="_blank" class="btn btn-outline-primary">View on Google Maps</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
 {% endblock %}
