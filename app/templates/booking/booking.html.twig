@@ -37,7 +37,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
             var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridDay', // Default to day view
+                initialView: 'timeGridDay', // Default to day view
                 events: [
                     {% for slot in slots %}
                     {
